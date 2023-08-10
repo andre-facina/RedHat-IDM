@@ -1,6 +1,7 @@
 # This script will extract both group information and their corresponding members from Red Hat IDM. It will then compile this data into an organized groups.xlsx file, where each sheet will represent a group along with its respective members.
 # Author: Andre Facina
 # Version 0.1
+# Tested in Red Hat Identity Management version: 4.10.1
 
 import ldap3
 from openpyxl import Workbook
@@ -48,4 +49,5 @@ else:
     print("Groups written to groups.xlsx")
 
     connection.unbind()
+
 
