@@ -47,7 +47,7 @@ def main():
 
         workbook = Workbook()
 
-# Write the group and members in the xlsx
+# Write the group and members into the groups.xlsx
         for group in groups:
             group_name = group.get('cn', ['N/A'])[0]
             sanitized_group_name = re.sub(r'[\/:*?"<>|]', '_', group_name)
