@@ -13,7 +13,7 @@ def main():
     parser = argparse.ArgumentParser(description="LDAP Group Extraction Tool")
     parser.add_argument("--server", required=True, help="LDAP server URI")
     parser.add_argument("--bind_dn", required=True, help="Bind DN")
-    parser.add_argument("--bind_password", help="Bind password. You can omit it and avoid clear text")
+    parser.add_argument("--bind_password", help="Bind password. You can omit it and avoid clear text password")
 
     args = parser.parse_args()
 
@@ -38,7 +38,7 @@ def main():
     else:
         print("Connected to the server")
 
-# Extract members of group
+# Extract members and groups
         groups = []
         connection.search(base_dn, group_search_filter, attributes=group_attributes)
         if connection.response:
@@ -47,7 +47,7 @@ def main():
 
         workbook = Workbook()
 
-# Write the group and members into the groups.xlsx
+# Write the groups and members into the groups.xlsx
         for group in groups:
             group_name = group.get('cn', ['N/A'])[0]
             sanitized_group_name = re.sub(r'[\/:*?"<>|]', '_', group_name)
