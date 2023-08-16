@@ -59,7 +59,7 @@ def main():
                 csv_writer = csv.writer(csvfile)
                 
                 header = [
-                    'User login', 'First name', 'Last name', 'Full name', 'dn', 'ipaUniqueID',
+                    'User login', 'First name', 'Last name', 'Full name', 'Distinguished Name', 'ipaUniqueID',
                     'Home directory', 'Login shell', 'Principal name', 'Email address',
                     'UID', 'GID', 'ipaNTSecurityIdentifier', 'Member of groups'
                 ]
@@ -73,7 +73,7 @@ def main():
                     last_name = user_attributes.get('sn', ['N/A'])
                     full_name = f"{first_name[0]} {last_name[0]}" if first_name and last_name else 'N/A'
                     #full_name = user_attributes.get('displayName')
-                    dn = user_attributes.get('dn')
+                    dn = entry['dn']
                     ipaUniqueID = user_attributes.get('ipaUniqueID')[0]
                     display_name = full_name
                     #initials = f"{first_name[0]}{last_name[0]}" if first_name and last_name else 'N/A'
