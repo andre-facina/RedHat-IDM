@@ -1,7 +1,7 @@
 # This script extracts all attributes of the users from Red Hat Identity Manager and then write this information into a CSV file named "users.csv". This CSV file contains rows where each row represents an user and each column represents an attribute of that user.
 # Tested in Red Hat Identity Management version: 4.10.1
-# Usage: python3 redhat_idm_users.py --server IDM_IP_OR_HOSTNAME --bind_dn "cn=Directory Manager" --base_dn "dc=your_domain,dc=your_domain,dc=com"
 # Author: Andre Facina
+# Usage: python3 redhat_idm_users.py --server IDM_IP_OR_HOSTNAME --bind_dn "cn=Directory Manager" --base_dn "dc=your_domain,dc=your_domain,dc=com"
 
 import csv
 import ldap3
@@ -36,8 +36,8 @@ def main():
     #base_dn = 'dc=example,dc=redhat,dc=com'
     search_filter = '(objectClass=person)'
     attributes = [
-        'uid', 'givenName', 'sn', 'cn', 'homeDirectory', 'gecos', 'loginShell',
-        'krbPrincipalName', 'mail', 'uidNumber', 'gidNumber', 'memberOf', #'userPassword'
+        'uid', 'givenName', 'sn', 'cn', 'ipaUniqueID', 'dn', 'homeDirectory', 'gecos', 'loginShell',
+        'krbPrincipalName', 'mail', 'uidNumber', 'gidNumber', 'memberOf', 'ipaNTSecurityIdentifier'  #'userPassword'
     ]
 
     # Connection
@@ -59,9 +59,9 @@ def main():
                 csv_writer = csv.writer(csvfile)
                 
                 header = [
-                    'User login', 'First name', 'Last name', 'Full name', 'Display name', 'Initials',
-                    'Home directory', 'GECOS', 'Login shell', 'Principal name', 'Email address',
-                    'UID', 'GID', 'Member of groups', #Password
+                    'User login', 'First name', 'Last name', 'Full name', 'dn', 'ipaUniqueID',
+                    'Home directory', 'Login shell', 'Principal name', 'Email address',
+                    'UID', 'GID', 'ipaNTSecurityIdentifier', 'Member of groups'
                 ]
                 csv_writer.writerow(header)
                 
@@ -72,42 +72,46 @@ def main():
                     first_name = user_attributes.get('givenName', ['N/A'])
                     last_name = user_attributes.get('sn', ['N/A'])
                     full_name = f"{first_name[0]} {last_name[0]}" if first_name and last_name else 'N/A'
+                    #full_name = user_attributes.get('displayName')
+                    dn = user_attributes.get('dn')
+                    ipaUniqueID = user_attributes.get('ipaUniqueID')[0]
                     display_name = full_name
-                    initials = f"{first_name[0]}{last_name[0]}" if first_name and last_name else 'N/A'
-                    home_directory = user_attributes.get('homeDirectory', ['N/A'])[0]
-                    gecos = user_attributes.get('gecos', ['N/A'])[0]
-                    login_shell = user_attributes.get('loginShell', ['N/A'])[0]
+                    #initials = f"{first_name[0]}{last_name[0]}" if first_name and last_name else 'N/A'
+                    home_directory = user_attributes.get('homeDirectory') #, ['N/A'])[1]
+                    login_shell = user_attributes.get('loginShell') #, ['N/A'])[1]
                     principal_name = user_attributes.get('krbPrincipalName', ['N/A'])[0]
                     email_list = user_attributes.get('mail', ['N/A'])
                     email = email_list[0] if email_list else 'N/A'
                     uid = str(user_attributes.get('uidNumber', ['N/A']))
                     gid = str(user_attributes.get('gidNumber', ['N/A']))
+                    ipaNTSecurityIdentifier =  user_attributes.get('ipaNTSecurityIdentifier')
+                    #password = user_attributes.get('userPassword') #, ['False'])[0] # The user's hashes
                     member_of_groups = ', '.join(user_attributes.get('memberOf', ['N/A']))
-                    #password = user_attributes.get('userPassword', ['False'])[0] # The user's hashes
                     
                     # Write user attributes to CSV file
                     csv_writer.writerow([
                         user_login, first_name[0] if first_name else 'N/A',
-                        last_name[0] if last_name else 'N/A', full_name, display_name, initials,
-                        home_directory, gecos, login_shell, principal_name, email,
-                        uid, gid, member_of_groups #, password
+                        last_name[0] if last_name else 'N/A', full_name, dn, ipaUniqueID,
+                        home_directory, login_shell, principal_name, email,
+                        uid, gid, ipaNTSecurityIdentifier,  member_of_groups
                     ])
                     
                     print("User Login:", user_login)
                     print("First name:", first_name[0] if first_name else 'N/A')
                     print("Last name:", last_name[0] if last_name else 'N/A')
                     print("Full name:", full_name)
-                    print("Display name:", display_name)
-                    print("Initials:", initials)
+                    #print("Display name:", display_name)
+                    print("Distinguished Name:", dn)
+                    print("ipaUniqueID:", ipaUniqueID)
                     print("Home directory:", home_directory)
-                    print("GECOS:", gecos)
                     print("Login shell:", login_shell)
                     print("Principal name:", principal_name)
                     print("Email address:", email)
                     print("UID:", uid)
                     print("GID:", gid)
-                    print("Member of groups:", member_of_groups)
                     #print("Password:", password)
+                    print("ipaNTSecurityIdentifier:", ipaNTSecurityIdentifier)
+                    print("Member of groups:", member_of_groups)
                     print("-" * 20)
             
             print("User attributes written to users_" + str(domain) + ".csv")
